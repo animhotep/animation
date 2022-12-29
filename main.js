@@ -13,31 +13,32 @@ anim();
 
 function repaint() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+    ballsCount.innerHTML = 'Count: ' + Balls.length;
     Balls.forEach((b, index) => {
         b.draw();
-/*        if (b.destroy) {
-            delete Balls[index]
-        }*/
+        if (b.destroy) {
+            Balls.splice(index, 1);
+        }
     })
 }
 
-function Ball(x, y) {
-    this.dx = 1;
-    this.dy = 1;
+function Ball(x, y, radius) {
+    this.dx = Math.random()*2;
+    this.dy = Math.random()*2;
     this.x = x;
     this.y = y;
-    this.radius = 40;
-    this.fillStyle = "#0095DD";
+    this.radius = radius || 40;
+    this.fillStyle =  '#'+Math.floor(Math.random()*16777215).toString(16);
+    this.stopped = false;
 
     this.draw = function () {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.fillStyle;
         ctx.fill();
-        ctx.lineWidth = 4;
+/*        ctx.lineWidth = 4;
         ctx.strokeStyle = "black";
-        ctx.stroke();
+        ctx.stroke();*/
         ctx.closePath();
 
         move.call(this);
@@ -47,8 +48,9 @@ function Ball(x, y) {
 function move() {
     collisionDetection.call(this);
     
+    if (this.stopped) return;
+    
     if (this.x + this.dx > canvas.width - this.radius || this.x + this.dx < this.radius) {
-        this.destroy = true;
         this.dx = -this.dx;
     }
     if (this.y + this.dy > canvas.height - this.radius || this.y + this.dy < this.radius) {
@@ -63,40 +65,36 @@ function collisionDetection() {
     Balls.forEach((b, index) => {
         let dx = this.x - b.x;
         let dy = this.y - b.y;
-
         let distance = Math.sqrt(dx*dx+dy*dy);
 
         if (distance !== 0 && distance <= (this.radius + b.radius)) {
-            console.log('=')
+            //37.71368821877989 84
+           // console.log(distance, this.radius + b.radius)
+            console.log('бумць')
+            
             this.dx = -this.dx;
             this.dy = -this.dy;
-            b.dx = -b.dx;
-            b.dy = -b.dy;
             
-            
-            b.radius +=1;
-            this.radius -=1;
-            this.fillStyle =  '#'+Math.floor(Math.random()*16777215).toString(16);
+            //this.fillStyle =  '#'+Math.floor(Math.random()*16777215).toString(16);
+
+/*            b.dx = -b.dx;
+            b.dy = -b.dy;*/
+
+            if (((this.radius + b.radius) - distance) > (Math.abs(this.dx)*2 + Math.abs(b.dx)*2)) {
+                this.destroy = true;
+                add();
+            }
         }
-/*        if (this.x + this.dx < (b.x+b.radius*2) && this.x > b.x) {
-            this.fillStyle = "red";
-            this.dx = -this.dx*Math.random();
-            b.dx = -b.dx;
-            console.log(this.x)
-        }
-        
-        if (this.y + this.dy > (b.y-b.radius*2) && this.y < b.y) {
-            this.fillStyle = "green";
-            this.dy = -this.dy;
-            b.dy = -b.dy;
-            console.log(this.y)
-        }*/
     })
 }
 
-Balls.push(new Ball(450, 450))
-Balls.push(new Ball(450, 50))
+for(let i =0; i<=45; i++) {
+    add();
+}
 
 function add() {
-    Balls.push(new Ball(Math.random()*100+40, Math.random()*200+40))
+    Balls.push(new Ball(Math.random()*1500, Math.random()*900,  Math.random()*40+10))
 }
+canvas.addEventListener("click", function(e) {
+    Balls.push(new Ball(e.clientX, e.clientY,  Math.random()*20+10))
+});
