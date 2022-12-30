@@ -1,6 +1,10 @@
 const canvas = document.getElementById("tutorial");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 const ctx = canvas.getContext("2d");
 let Balls = [];
+let gen = 0;
 
 function anim() {
 //опис самої анімації
@@ -83,6 +87,8 @@ function collisionDetection() {
             if (((this.radius + b.radius) - distance) > (Math.abs(this.dx)*2 + Math.abs(b.dx)*2)) {
                 this.destroy = true;
                 add();
+                genCount.innerHTML = 'Generation: ' + gen;
+                gen++;
             }
         }
     })
@@ -93,7 +99,7 @@ for(let i =0; i<=45; i++) {
 }
 
 function add() {
-    Balls.push(new Ball(Math.random()*1500, Math.random()*900,  Math.random()*40+10))
+    Balls.push(new Ball(Math.random()*canvas.width, Math.random()*canvas.height,  Math.random()*45+10))
 }
 canvas.addEventListener("click", function(e) {
     Balls.push(new Ball(e.clientX, e.clientY,  Math.random()*20+10))
