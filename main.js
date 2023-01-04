@@ -1,8 +1,6 @@
-const canvas = document.getElementById("tutorial");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+let width = window.innerWidth ;
+let height = window.innerHeight;
 
-const ctx = canvas.getContext("2d");
 let Balls = [];
 let gen = 0;
 
@@ -16,7 +14,6 @@ function anim() {
 anim();
 
 function repaint() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ballsCount.innerHTML = 'Count: ' + Balls.length;
     Balls.forEach((b, index) => {
         b.draw();
@@ -27,25 +24,29 @@ function repaint() {
 }
 
 function Ball(x, y, radius) {
-    this.dx = Math.random()*2;
-    this.dy = Math.random()*2;
+    this.dx = Math.random()*2+1;
+    this.dy = Math.random()*2+1;
     this.x = x;
     this.y = y;
     this.radius = radius || 40;
     this.fillStyle =  '#'+Math.floor(Math.random()*16777215).toString(16);
     this.stopped = false;
+    this.gen = gen;
+
+    let div =  document.createElement('div');
+    div.className = 'ball';
+    div.style.width = this.radius * 2 +'px';
+    div.style.height = this.radius * 2 +'px';
+    div.style.backgroundColor = this.fillStyle;
 
     this.draw = function () {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.fillStyle;
-        ctx.fill();
-/*        ctx.lineWidth = 4;
-        ctx.strokeStyle = "black";
-        ctx.stroke();*/
-        ctx.closePath();
-
+        div.style.left = this.x - this.radius +'px';
+        div.style.top = this.y - this.radius +'px';
+        div.innerText = this.gen;
+        
         move.call(this);
+        document.body.appendChild(div);
+        if (this.destroy) div.remove();
     }
 }
 
@@ -54,10 +55,10 @@ function move() {
     
     if (this.stopped) return;
     
-    if (this.x + this.dx > canvas.width - this.radius || this.x + this.dx < this.radius) {
+    if (this.x + this.dx > width - this.radius || this.x + this.dx < this.radius * 2) {
         this.dx = -this.dx;
     }
-    if (this.y + this.dy > canvas.height - this.radius || this.y + this.dy < this.radius) {
+    if (this.y + this.dy > height - this.radius || this.y + this.dy < this.radius*2) {
         this.dy = -this.dy;
     }
     
@@ -73,17 +74,12 @@ function collisionDetection() {
 
         if (distance !== 0 && distance <= (this.radius + b.radius)) {
             //37.71368821877989 84
-           // console.log(distance, this.radius + b.radius)
+            //console.log(distance, this.radius, b.radius)
             console.log('бумць')
             
             this.dx = -this.dx;
             this.dy = -this.dy;
             
-            //this.fillStyle =  '#'+Math.floor(Math.random()*16777215).toString(16);
-
-/*            b.dx = -b.dx;
-            b.dy = -b.dy;*/
-
             if (((this.radius + b.radius) - distance) > (Math.abs(this.dx)*2 + Math.abs(b.dx)*2)) {
                 this.destroy = true;
                 add();
@@ -99,8 +95,9 @@ for(let i =0; i<=45; i++) {
 }
 
 function add() {
-    Balls.push(new Ball(Math.random()*canvas.width, Math.random()*canvas.height,  Math.random()*45+10))
+    Balls.push(new Ball(Math.random()*width+40, Math.random()*height+40,  Math.random()*45+10))
 }
-canvas.addEventListener("click", function(e) {
+
+document.addEventListener("click", function(e) {
     Balls.push(new Ball(e.clientX, e.clientY,  Math.random()*20+10))
 });
